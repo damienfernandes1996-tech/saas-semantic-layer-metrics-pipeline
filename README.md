@@ -1,6 +1,8 @@
 # SaaS Semantic Layer Metrics Pipeline
 ### Architecture médaillon + couche sémantique + dashboard KPI (dbt · MetricFlow · DuckDB)
 
+[Voir le dashboard interactif en ligne](https://damienfernandes1996-tech.github.io/saas-semantic-layer-metrics-pipeline/dashboard.html)
+
 Pipeline analytique complet sur des données d'abonnements SaaS (synthétiques, volontairement « sales ») :
 **bronze → silver → gold → couche sémantique**. Les KPI métier (MRR, ARR, clients actifs, ARPA, churn)
 sont définis **une seule fois**, en YAML, et interrogeables par n'importe quel outil (CLI, BI, notebook, LLM).
