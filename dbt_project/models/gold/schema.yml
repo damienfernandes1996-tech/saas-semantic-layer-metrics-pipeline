@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: metricflow_time_spine
+    description: "Table calendrier journalière requise par MetricFlow."
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        granularity: day
+        tests: [unique, not_null]
+
+  - name: dim_customer
+    description: "Dimension client (dédoublonnée, pays normalisés)."
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: segment
+        tests:
+          - accepted_values:
+              arguments:
+                values: ['SMB', 'Mid-Market', 'Enterprise']
+      - name: country
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['France', 'Germany', 'Spain', 'Italy', 'United Kingdom', 'Netherlands', 'Belgium', 'Switzerland']
+
+  - name: dim_plan
+    description: "Dimension plan tarifaire."
+    columns:
+      - name: plan_id
+        tests: [unique, not_null]
+
+  - name: fct_mrr_snapshot
+    description: "Snapshot mensuel du MRR : 1 ligne par abonnement actif en fin de mois."
+    columns:
+      - name: snapshot_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - relationships:
+              arguments: {to: ref('dim_customer'), field: customer_id}
+      - name: plan_id
+        tests:
+          - relationships:
+              arguments: {to: ref('dim_plan'), field: plan_id}
+      - name: mrr
+        tests: [not_null]
+
+  - name: fct_churn
+    description: "Événements de churn (fin d'abonnement sans reprise)."
+    columns:
+      - name: churn_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - relationships:
+              arguments: {to: ref('dim_customer'), field: customer_id}
+
+  - name: fct_invoices
+    description: "Factures payées, dédoublonnées, rattachées à un abonnement valide."
+    columns:
+      - name: invoice_id
+        tests: [unique, not_null]
+      - name: amount
+        tests: [not_null]

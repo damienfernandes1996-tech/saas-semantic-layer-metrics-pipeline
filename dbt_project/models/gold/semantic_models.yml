@@ -1,0 +1,127 @@
+version: 2
+
+semantic_models:
+  - name: customers
+    description: "Clients (dimensions d'analyse)."
+    model: ref('dim_customer')
+    defaults:
+      agg_time_dimension: signup_date
+    entities:
+      - name: customer
+        type: primary
+        expr: customer_id
+    dimensions:
+      - name: segment
+        type: categorical
+      - name: country
+        type: categorical
+      - name: industry
+        type: categorical
+      - name: signup_date
+        type: time
+        type_params: {time_granularity: day}
+    measures:
+      - name: new_customers
+        description: "Clients inscrits (par date d'inscription)."
+        agg: sum
+        expr: 1
+
+  - name: plans
+    description: "Plans tarifaires."
+    model: ref('dim_plan')
+    entities:
+      - name: plan
+        type: primary
+        expr: plan_id
+    dimensions:
+      - name: plan_name
+        type: categorical
+
+  - name: mrr_snapshot
+    description: "Snapshot mensuel des abonnements actifs. Mesures semi-additives dans le temps."
+    model: ref('fct_mrr_snapshot')
+    defaults:
+      agg_time_dimension: snapshot_month
+    entities:
+      - name: snapshot
+        type: primary
+        expr: snapshot_id
+      - name: subscription
+        type: foreign
+        expr: subscription_id
+      - name: customer
+        type: foreign
+        expr: customer_id
+      - name: plan
+        type: foreign
+        expr: plan_id
+    dimensions:
+      - name: snapshot_month
+        type: time
+        type_params: {time_granularity: day}
+    measures:
+      - name: mrr
+        description: "MRR : somme sur les clients, mais dernière valeur sur l'axe temps."
+        agg: sum
+        expr: mrr
+        non_additive_dimension:
+          name: snapshot_month
+          window_choice: max
+      - name: active_customers
+        description: "Clients actifs (fin de période)."
+        agg: count_distinct
+        expr: customer_id
+        non_additive_dimension:
+          name: snapshot_month
+          window_choice: max
+
+  - name: churn
+    description: "Événements de churn."
+    model: ref('fct_churn')
+    defaults:
+      agg_time_dimension: churn_date
+    entities:
+      - name: churn
+        type: primary
+        expr: churn_id
+      - name: customer
+        type: foreign
+        expr: customer_id
+      - name: plan
+        type: foreign
+        expr: plan_id
+    dimensions:
+      - name: churn_date
+        type: time
+        type_params: {time_granularity: day}
+    measures:
+      - name: churned_customers
+        agg: sum
+        expr: 1
+      - name: lost_mrr
+        agg: sum
+        expr: lost_mrr
+
+  - name: invoices
+    description: "Factures payées."
+    model: ref('fct_invoices')
+    defaults:
+      agg_time_dimension: invoice_date
+    entities:
+      - name: invoice
+        type: primary
+        expr: invoice_id
+      - name: customer
+        type: foreign
+        expr: customer_id
+      - name: plan
+        type: foreign
+        expr: plan_id
+    dimensions:
+      - name: invoice_date
+        type: time
+        type_params: {time_granularity: day}
+    measures:
+      - name: revenue_amount
+        agg: sum
+        expr: amount

@@ -1,0 +1,67 @@
+version: 2
+
+metrics:
+  - name: mrr
+    label: MRR
+    description: "Monthly Recurring Revenue (fin de période)."
+    type: simple
+    type_params: {measure: mrr}
+
+  - name: arr
+    label: ARR
+    description: "Annual Recurring Revenue = MRR x 12."
+    type: derived
+    type_params:
+      expr: mrr * 12
+      metrics: [mrr]
+
+  - name: active_customers
+    label: Clients actifs
+    type: simple
+    type_params: {measure: active_customers}
+
+  - name: churned_customers
+    label: Clients perdus
+    type: simple
+    type_params: {measure: churned_customers}
+
+  - name: lost_mrr
+    label: MRR perdu
+    type: simple
+    type_params: {measure: lost_mrr}
+
+  - name: revenue
+    label: Chiffre d'affaires facturé
+    type: simple
+    type_params: {measure: revenue_amount}
+
+  - name: arpa
+    label: ARPA
+    description: "Average Revenue Per Account = MRR / clients actifs."
+    type: ratio
+    type_params:
+      numerator: mrr
+      denominator: active_customers
+
+  - name: active_customers_prev_month
+    label: Clients actifs (mois précédent)
+    type: derived
+    type_params:
+      expr: prev
+      metrics:
+        - name: active_customers
+          offset_window: 1 month
+          alias: prev
+
+  - name: customer_churn_rate
+    label: Taux de churn clients
+    description: "Clients perdus du mois / clients actifs fin du mois précédent."
+    type: ratio
+    type_params:
+      numerator: churned_customers
+      denominator: active_customers_prev_month
+
+  - name: new_customers
+    label: Nouveaux clients
+    type: simple
+    type_params: {measure: new_customers}
