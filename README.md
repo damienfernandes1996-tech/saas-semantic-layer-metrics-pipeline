@@ -1,7 +1,7 @@
 # SaaS Semantic Layer Metrics Pipeline
 ### Architecture médaillon + couche sémantique + dashboard KPI (dbt · MetricFlow · DuckDB)
 
-[Voir le dashboard interactif en ligne](https://damienfernandes1996-tech.github.io/saas-semantic-layer-metrics-pipeline/dashboard.html)
+**👉 [Voir le dashboard interactif en ligne](https://damienfernandes1996-tech.github.io/saas-semantic-layer-metrics-pipeline/dashboard.html)**
 
 Pipeline analytique complet sur des données d'abonnements SaaS (synthétiques, volontairement « sales ») :
 **bronze → silver → gold → couche sémantique**. Les KPI métier (MRR, ARR, clients actifs, ARPA, churn)
@@ -60,7 +60,8 @@ Catalogue complet généré automatiquement : [`docs/metric_catalog.md`](docs/me
 [`docs/dashboard.html`](docs/dashboard.html) : dashboard interactif autonome (un seul fichier, s'ouvre dans le navigateur).
 Toutes les métriques sont lues via `mf query` : le dashboard ne recalcule aucun KPI.
 
-- **Cartes** : MRR, ARR, clients actifs, ARPA (avec évolution sur 12 mois), churn mensuel, NRR et rétention logo à 12 mois.
+- **Filtres de période** en haut : Tout, par année, 12 ou 6 derniers mois, ou sélecteurs « de / à » ; cartes, graphiques et constats se recalculent.
+- **Cartes** : MRR, ARR, clients actifs, ARPA (avec évolution), nouveaux clients et clients perdus, churn mensuel, NRR et rétention logo à 12 mois.
 - **Graphiques** : MRR par segment / plan / pays / secteur, nouveaux clients vs perdus, taux de churn, ARPA, NRR, MRR perdu par segment, CA facturé vs MRR.
 - **Lecture rapide** : constats rédigés automatiquement à partir des chiffres.
 

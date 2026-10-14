@@ -19,8 +19,8 @@ _Généré automatiquement depuis `semantic_manifest.json`._
 
 | Modèle | Entités | Dimensions | Mesures |
 |---|---|---|---|
-| customers | customer | segment, country, industry, signup_date | new_customers |
 | plans | plan | plan_name |  |
 | mrr_snapshot | snapshot, subscription, customer, plan | snapshot_month | mrr, active_customers |
 | churn | churn, customer, plan | churn_date | churned_customers, lost_mrr |
 | invoices | invoice, customer, plan | invoice_date | revenue_amount |
+| customers | customer | segment, country, industry, signup_date | new_customers |

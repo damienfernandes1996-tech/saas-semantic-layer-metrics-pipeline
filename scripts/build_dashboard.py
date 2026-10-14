@@ -44,31 +44,32 @@ group by cur.snapshot_month order by 1
 """).df()
 con.close()
 
-last = kpi.iloc[-1]; prev12 = kpi.iloc[-13]
-ymonth = last["month"]
-def sub(df, col, key): return df[df.month == ymonth].set_index(col)[key].sort_values(ascending=False)
-c3 = kpi.tail(3)["customer_churn_rate"].mean()
+months = kpi["month"].tolist()
+
+
+def series(df, col, key):
+    """{valeur: [série alignée sur months]} pour une dimension donnée."""
+    out = {}
+    for v in sorted(df[col].dropna().unique()):
+        out[v] = df[df[col] == v].set_index("month")[key].reindex(months).fillna(0).round(2).tolist()
+    return out
+
+
 data = {
-    "months": kpi["month"].tolist(),
+    "months": months,
     "kpi": {c: kpi[c].round(4).tolist() for c in kpi.columns if c != "month"},
-    "seg": {s: seg[seg.customer__segment == s].set_index("month")["mrr"].reindex(kpi["month"]).fillna(0).tolist() for s in seg.customer__segment.unique()},
-    "plan": {s: plan[plan.plan__plan_name == s].set_index("month")["mrr"].reindex(kpi["month"]).fillna(0).tolist() for s in plan.plan__plan_name.unique()},
-    "country": sub(ctry, "customer__country", "mrr").round(0).to_dict(),
-    "industry": sub(ind, "customer__industry", "mrr").round(0).to_dict(),
-    "churn_seg": churn_seg.groupby("customer__segment")[["churned_customers", "lost_mrr"]].sum().to_dict("index"),
+    "seg": series(seg, "customer__segment", "mrr"),
+    "plan": {k: series(plan, "plan__plan_name", "mrr")[k] for k in ["Starter", "Growth", "Scale"]},
+    "country": series(ctry, "customer__country", "mrr"),
+    "industry": series(ind, "customer__industry", "mrr"),
+    "lost_seg": series(churn_seg, "customer__segment", "lost_mrr"),
+    "churn_seg": series(churn_seg, "customer__segment", "churned_customers"),
     "nrr_months": nrr["month"].tolist(), "nrr": nrr["nrr"].tolist(), "logo": nrr["logo_retention"].tolist(),
-    "cards": {
-        "mrr": float(last["mrr"]), "mrr_yoy": float(last["mrr"] / prev12["mrr"] - 1),
-        "arr": float(last["arr"]), "active": int(last["active_customers"]),
-        "active_yoy": float(last["active_customers"] / prev12["active_customers"] - 1),
-        "arpa": float(last["arpa"]), "arpa_yoy": float(last["arpa"] / prev12["arpa"] - 1),
-        "churn3": float(c3), "nrr": float(nrr["nrr"].iloc[-1]), "logo": float(nrr["logo_retention"].iloc[-1]),
-        "month": ymonth,
-    },
 }
 chartjs = (ROOT / "scripts" / "vendor" / "chart.umd.js").read_text()
 tpl = (ROOT / "scripts" / "dashboard_template.html").read_text()
 html = tpl.replace("/*CHARTJS*/", chartjs).replace("/*DATA*/", "const D = " + json.dumps(data) + ";")
 (ROOT / "docs").mkdir(exist_ok=True)
 (ROOT / "docs" / "dashboard.html").write_text(html)
+(ROOT / "docs" / "index.html").write_text(html)  # page d'accueil GitHub Pages
 print("docs/dashboard.html écrit", len(html) // 1024, "Ko")

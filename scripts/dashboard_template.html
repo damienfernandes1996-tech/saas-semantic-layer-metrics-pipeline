@@ -5,20 +5,31 @@
 :root{--bg:#f6f7f9;--card:#fff;--tx:#1a1d23;--mut:#6b7280;--bd:#e5e7eb;--a:#2563eb;--g:#16a34a;--r:#dc2626}
 @media(prefers-color-scheme:dark){:root{--bg:#0f1216;--card:#181c22;--tx:#e8eaed;--mut:#9aa3af;--bd:#2a313a}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,sans-serif}
-header{padding:20px 24px 4px}h1{margin:0;font-size:20px}.sub{color:var(--mut);margin-top:2px}
+header{padding:18px 24px 8px;max-width:1280px;margin:auto}h1{margin:0;font-size:20px}.sub{color:var(--mut);margin-top:2px}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--bd);padding:10px 24px}
+.bar-in{max-width:1280px;margin:auto;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.bar label{color:var(--mut);font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:999px;padding:5px 12px;font:inherit;cursor:pointer}
+.chip:hover{border-color:var(--a)}.chip.on{background:var(--a);border-color:var(--a);color:#fff}
+.rng{display:flex;align-items:center;gap:6px;margin-left:auto}
+select{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:5px 8px;font:inherit}
 .wrap{padding:16px 24px 32px;max-width:1280px;margin:auto}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
 .card,.panel{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px}
 .card .l{color:var(--mut);font-size:12px}.card .v{font-size:24px;font-weight:650;margin:4px 0 2px}
-.d{font-size:12px}.up{color:var(--g)}.dn{color:var(--r)}
+.d{font-size:12px;color:var(--mut)}.up{color:var(--g)}.dn{color:var(--r)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px}
 .panel h3{margin:0 0 2px;font-size:14px}.panel p{margin:0 0 8px;color:var(--mut);font-size:12px}
 .panel canvas{max-height:250px}.ins{margin:16px 0;padding:14px;border-left:3px solid var(--a);background:var(--card);border-radius:6px}
-.ins li{margin:4px 0}footer{color:var(--mut);font-size:12px;margin-top:16px}
-@media(max-width:480px){.grid{grid-template-columns:1fr}.wrap{padding:12px 14px}}
+.ins ul{margin:6px 0 0;padding-left:20px}.ins li{margin:4px 0}footer{color:var(--mut);font-size:12px;margin-top:16px}
+@media(max-width:480px){.grid{grid-template-columns:1fr}.wrap,.bar,header{padding-left:14px;padding-right:14px}.rng{margin-left:0}}
 </style></head><body>
-<header><h1>Dashboard KPI — SaaS B2B</h1>
-<div class="sub" id="sub"></div></header>
+<header><h1>Dashboard KPI — SaaS B2B</h1><div class="sub" id="sub"></div></header>
+<div class="bar"><div class="bar-in">
+  <label>Période</label><div class="chips" id="chips"></div>
+  <div class="rng"><label for="f">De</label><select id="f"></select><label for="t">à</label><select id="t"></select></div>
+</div></div>
 <div class="wrap">
 <div class="cards" id="cards"></div>
 <div class="ins"><b>Lecture rapide</b><ul id="ins"></ul></div>
@@ -28,10 +39,10 @@ header{padding:20px 24px 4px}h1{margin:0;font-size:20px}.sub{color:var(--mut);ma
 <div class="panel"><h3>Taux de churn mensuel (%)</h3><p><code>customer_churn_rate</code> = perdus / actifs fin du mois précédent</p><canvas id="c3"></canvas></div>
 <div class="panel"><h3>ARPA (€)</h3><p><code>arpa</code> = MRR / clients actifs</p><canvas id="c4"></canvas></div>
 <div class="panel"><h3>MRR par plan</h3><p>Mix Starter / Growth / Scale</p><canvas id="c5"></canvas></div>
-<div class="panel"><h3>NRR et rétention logo à 12 mois (%)</h3><p>Calculé en SQL sur <code>fct_mrr_snapshot</code></p><canvas id="c6"></canvas></div>
-<div class="panel"><h3>MRR par pays</h3><p id="p7"></p><canvas id="c7"></canvas></div>
-<div class="panel"><h3>MRR par secteur</h3><p id="p8"></p><canvas id="c8"></canvas></div>
-<div class="panel"><h3>MRR perdu par segment (cumul)</h3><p><code>lost_mrr</code> sur toute la période</p><canvas id="c9"></canvas></div>
+<div class="panel"><h3>NRR et rétention logo à 12 mois (%)</h3><p>Calculé en SQL sur <code>fct_mrr_snapshot</code> (disponible dès janv. 2024)</p><canvas id="c6"></canvas></div>
+<div class="panel"><h3>MRR par pays</h3><p class="end"></p><canvas id="c7"></canvas></div>
+<div class="panel"><h3>MRR par secteur</h3><p class="end"></p><canvas id="c8"></canvas></div>
+<div class="panel"><h3>MRR perdu par segment</h3><p>Cumul de <code>lost_mrr</code> sur la période sélectionnée</p><canvas id="c9"></canvas></div>
 <div class="panel"><h3>CA facturé vs MRR (€)</h3><p><code>revenue</code> : factures payées du mois</p><canvas id="c10"></canvas></div>
 </div>
 <footer>Généré par <code>scripts/build_dashboard.py</code> — toutes les métriques proviennent de la couche sémantique MetricFlow ; données synthétiques.</footer>
@@ -39,44 +50,97 @@ header{padding:20px 24px 4px}h1{margin:0;font-size:20px}.sub{color:var(--mut);ma
 <script>/*CHARTJS*/</script>
 <script>
 /*DATA*/
+const M=D.months,N=M.length,K=D.kpi;
 const fmt=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(n);
 const pct=(x,d=1)=>(x*100).toFixed(d).replace('.',',')+' %';
-const c=D.cards;
-document.getElementById('sub').textContent='Situation à fin '+c.month+' · 1 500 clients simulés · janv. 2023 – déc. 2025';
-const card=(l,v,d,good=true)=>`<div class="card"><div class="l">${l}</div><div class="v">${v}</div><div class="d ${d==null?'':(good?'up':'dn')}">${d??''}</div></div>`;
-document.getElementById('cards').innerHTML=
- card('MRR',fmt(c.mrr)+' €','▲ '+pct(c.mrr_yoy,0)+' sur 12 mois')+
- card('ARR',fmt(c.arr)+' €',null)+
- card('Clients actifs',fmt(c.active),'▲ '+pct(c.active_yoy,0)+' sur 12 mois')+
- card('ARPA',fmt(c.arpa)+' €','▲ '+pct(c.arpa_yoy,0)+' sur 12 mois')+
- card('Churn mensuel (moy. 3 mois)',pct(c.churn3,2),null)+
- card('NRR 12 mois',c.nrr.toFixed(0)+' %',c.nrr>=100?'expansion > churn':'churn > expansion',c.nrr>=100)+
- card('Rétention logo 12 mois',c.logo.toFixed(0)+' %',null);
-const segs=Object.keys(D.seg), tot=Object.values(D.country).reduce((a,b)=>a+b,0);
-const lastSeg=segs.map(s=>[s,D.seg[s].at(-1)]).sort((a,b)=>b[1]-a[1]);
-const cs=D.churn_seg, worst=Object.entries(cs).sort((a,b)=>b[1].lost_mrr-a[1].lost_mrr)[0];
-const topC=Object.entries(D.country)[0];
-const cr=D.kpi.customer_churn_rate, imax=cr.indexOf(Math.max(...cr));
-document.getElementById('ins').innerHTML=
- `<li>Le MRR atteint <b>${fmt(c.mrr)} €</b> (${pct(c.mrr_yoy,0)} sur un an), porté par ${fmt(c.active)} clients actifs.</li>`+
- `<li>Segment n°1 : <b>${lastSeg[0][0]}</b> (${pct(lastSeg[0][1]/c.mrr,0)} du MRR).</li>`+
- `<li>NRR à <b>${c.nrr.toFixed(0)} %</b> : ${c.nrr>=100?'les upgrades compensent le churn sur la base existante.':'la base existante se contracte ; la croissance dépend de l\'acquisition.'}</li>`+
- `<li>Pic de churn en <b>${D.months[imax]}</b> : ${pct(cr[imax])} des clients perdus en un mois (hausse de prix simulée), puis retour progressif à la normale.</li>`+
- `<li>Le segment <b>${worst[0]}</b> concentre le plus de MRR perdu (${fmt(worst[1].lost_mrr)} € cumulés) ; premier pays : ${topC[0]} (${pct(topC[1]/tot,0)}).</li>`;
+const sum=a=>a.reduce((x,y)=>x+y,0);
+let i0=0,i1=N-1;
+const sl=a=>a.slice(i0,i1+1);
+
+/* ---- filtres ---- */
+const mkOpts=el=>{el.innerHTML=M.map((m,i)=>`<option value="${i}">${m}</option>`).join('')};
+const selF=document.getElementById('f'),selT=document.getElementById('t');mkOpts(selF);mkOpts(selT);
+const years=[...new Set(M.map(m=>m.slice(0,4)))];
+const presets=[['Tout',0,N-1],...years.map(y=>[y,M.findIndex(m=>m.startsWith(y)),M.map(m=>m.slice(0,4)).lastIndexOf(y)]),
+  ['12 derniers mois',N-12,N-1],['6 derniers mois',N-6,N-1]];
+const chips=document.getElementById('chips');
+presets.forEach(([lab,a,b])=>{const e=document.createElement('button');e.className='chip';e.textContent=lab;e.dataset.a=a;e.dataset.b=b;
+  e.onclick=()=>{i0=a;i1=b;render()};chips.appendChild(e)});
+selF.onchange=()=>{i0=+selF.value;if(i0>i1)i1=i0;render()};
+selT.onchange=()=>{i1=+selT.value;if(i1<i0)i0=i1;render()};
+
+/* ---- graphiques ---- */
 const col=['#2563eb','#f59e0b','#16a34a','#dc2626','#8b5cf6','#0891b2','#db2777','#64748b'];
 Chart.defaults.font.size=11;Chart.defaults.color=getComputedStyle(document.body).getPropertyValue('--mut')||'#6b7280';
-const mk=(id,type,labels,ds,o={})=>new Chart(document.getElementById(id),{type,data:{labels,datasets:ds},options:Object.assign({responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:ds.length>1}},elements:{point:{radius:0}}},o)});
+const CH={};
+const mk=(id,type,ds,o={})=>CH[id]=new Chart(document.getElementById(id),{type,data:{labels:[],datasets:ds},options:Object.assign({responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:ds.length>1}},elements:{point:{radius:0}},animation:{duration:250}},o)});
+const xt={x:{ticks:{maxTicksLimit:8}}};
 const stack={scales:{x:{stacked:true,ticks:{maxTicksLimit:8}},y:{stacked:true}}};
-const ds=(o,i)=>Object.keys(o).map((k,j)=>({label:k,data:o[k],backgroundColor:col[j]+'cc',borderColor:col[j],fill:true,borderWidth:1}));
-mk('c1','line',D.months,ds(D.seg),stack);
-mk('c2','bar',D.months,[{label:'Nouveaux',data:D.kpi.new_customers,backgroundColor:'#16a34a'},{label:'Perdus',data:D.kpi.churned_customers.map(x=>-x),backgroundColor:'#dc2626'}],{scales:{x:{stacked:true,ticks:{maxTicksLimit:8}},y:{stacked:true}}});
-mk('c3','line',D.months,[{label:'Churn',data:D.kpi.customer_churn_rate.map(x=>x*100),borderColor:col[3],borderWidth:2}],{scales:{x:{ticks:{maxTicksLimit:8}}}});
-mk('c4','line',D.months,[{label:'ARPA',data:D.kpi.arpa,borderColor:col[0],borderWidth:2}],{scales:{x:{ticks:{maxTicksLimit:8}}}});
-mk('c5','line',D.months,ds(D.plan),stack);
-mk('c6','line',D.nrr_months,[{label:'NRR',data:D.nrr,borderColor:col[0],borderWidth:2},{label:'Rétention logo',data:D.logo,borderColor:col[1],borderWidth:2}],{scales:{x:{ticks:{maxTicksLimit:8}}}});
-const bar=(id,o)=>mk(id,'bar',Object.keys(o),[{data:Object.values(o),backgroundColor:col[0]}],{indexAxis:'y',plugins:{legend:{display:false}}});
-document.getElementById('p7').textContent='Fin '+c.month;document.getElementById('p8').textContent='Fin '+c.month;
-bar('c7',D.country);bar('c8',D.industry);
-mk('c9','bar',Object.keys(cs),[{data:Object.values(cs).map(x=>x.lost_mrr),backgroundColor:col[3]}],{plugins:{legend:{display:false}}});
-mk('c10','line',D.months,[{label:'CA facturé',data:D.kpi.revenue,borderColor:col[2],borderWidth:2},{label:'MRR',data:D.kpi.mrr,borderColor:col[0],borderWidth:2,borderDash:[4,3]}],{scales:{x:{ticks:{maxTicksLimit:8}}}});
+const area=(o)=>Object.keys(o).map((k,j)=>({label:k,data:[],backgroundColor:col[j]+'cc',borderColor:col[j],fill:true,borderWidth:1}));
+mk('c1','line',area(D.seg),stack);
+mk('c2','bar',[{label:'Nouveaux',data:[],backgroundColor:'#16a34a'},{label:'Perdus',data:[],backgroundColor:'#dc2626'}],stack);
+mk('c3','line',[{label:'Churn',data:[],borderColor:col[3],borderWidth:2}],{scales:xt});
+mk('c4','line',[{label:'ARPA',data:[],borderColor:col[0],borderWidth:2}],{scales:xt});
+mk('c5','line',area(D.plan),stack);
+mk('c6','line',[{label:'NRR',data:[],borderColor:col[0],borderWidth:2},{label:'Rétention logo',data:[],borderColor:col[1],borderWidth:2}],{scales:xt});
+const hbar=id=>mk(id,'bar',[{data:[],backgroundColor:col[0]}],{indexAxis:'y',plugins:{legend:{display:false}}});
+hbar('c7');hbar('c8');
+mk('c9','bar',[{data:[],backgroundColor:col[3]}],{plugins:{legend:{display:false}}});
+mk('c10','line',[{label:'CA facturé',data:[],borderColor:col[2],borderWidth:2},{label:'MRR',data:[],borderColor:col[0],borderWidth:2,borderDash:[4,3]}],{scales:xt});
+
+function setC(id,labels,sets){const c=CH[id];c.data.labels=labels;sets.forEach((d,i)=>c.data.datasets[i].data=d);c.update();}
+const topAt=(o,i)=>Object.entries(o).map(([k,v])=>[k,v[i]]).sort((a,b)=>b[1]-a[1]);
+
+function render(){
+  const L=sl(M),len=L.length;
+  /* filtres : état visuel */
+  selF.value=i0;selT.value=i1;
+  chips.querySelectorAll('.chip').forEach(e=>e.classList.toggle('on',+e.dataset.a===i0&&+e.dataset.b===i1));
+  document.getElementById('sub').textContent=`Période : ${M[i0]} → ${M[i1]} · ${len} mois · 1 500 clients simulés`;
+
+  /* cartes */
+  const e=i1,base=e-12>=0?e-12:i0,lab=e-12>=0?'sur 12 mois':'depuis '+M[i0];
+  const dl=(k)=>{if(base>=e||!K[k][base])return null;const x=K[k][e]/K[k][base]-1;return{t:(x>=0?'▲ ':'▼ ')+pct(Math.abs(x),0)+' '+lab,g:x>=0}};
+  const card=(l,v,d)=>`<div class="card"><div class="l">${l}</div><div class="v">${v}</div><div class="d ${d?(d.g?'up':'dn'):''}">${d?d.t:'&nbsp;'}</div></div>`;
+  const cr=sl(K.customer_churn_rate),c3=cr.slice(-3),c3m=sum(c3)/c3.length;
+  const ni=D.nrr_months.indexOf(M[e]),nrr=ni>=0?D.nrr[ni]:null,logo=ni>=0?D.logo[ni]:null;
+  document.getElementById('cards').innerHTML=
+    card('MRR (fin de période)',fmt(K.mrr[e])+' €',dl('mrr'))+
+    card('ARR',fmt(K.arr[e])+' €',null)+
+    card('Clients actifs',fmt(K.active_customers[e]),dl('active_customers'))+
+    card('ARPA',fmt(K.arpa[e])+' €',dl('arpa'))+
+    card('Nouveaux clients (période)',fmt(sum(sl(K.new_customers))),null)+
+    card('Clients perdus (période)',fmt(sum(sl(K.churned_customers))),null)+
+    card('Churn mensuel (moy. '+c3.length+' mois)',pct(c3m,2),null)+
+    card('NRR 12 mois',nrr==null?'n/d':nrr.toFixed(0)+' %',nrr==null?null:{t:nrr>=100?'expansion > churn':'churn > expansion',g:nrr>=100})+
+    card('Rétention logo 12 mois',logo==null?'n/d':logo.toFixed(0)+' %',null);
+
+  /* lecture rapide */
+  const segTop=topAt(D.seg,e)[0],lost={};Object.entries(D.lost_seg).forEach(([k,v])=>lost[k]=sum(sl(v)));
+  const worst=Object.entries(lost).sort((a,b)=>b[1]-a[1])[0],ctry=topAt(D.country,e),totC=sum(ctry.map(x=>x[1]));
+  const imax=cr.indexOf(Math.max(...cr));
+  const g=dl('mrr');
+  let h=`<li>MRR de <b>${fmt(K.mrr[e])} €</b> fin ${M[e]}${g?` (${g.t.replace(/^[▲▼] /,g.g?'+':'−')})`:''}, ${fmt(K.active_customers[e])} clients actifs.</li>`;
+  h+=`<li>Segment n°1 : <b>${segTop[0]}</b> (${pct(segTop[1]/K.mrr[e],0)} du MRR) ; premier pays : <b>${ctry[0][0]}</b> (${pct(ctry[0][1]/totC,0)}).</li>`;
+  if(nrr!=null)h+=`<li>NRR à <b>${nrr.toFixed(0)} %</b> : ${nrr>=100?'les upgrades compensent le churn sur la base existante.':'la base existante se contracte ; la croissance dépend de l\'acquisition.'}</li>`;
+  if(len>=3)h+=`<li>Pic de churn de la période : <b>${L[imax]}</b> (${pct(cr[imax])} des clients perdus en un mois).</li>`;
+  if(worst&&worst[1]>0)h+=`<li>Le segment <b>${worst[0]}</b> concentre le plus de MRR perdu sur la période (${fmt(worst[1])} €).</li>`;
+  document.getElementById('ins').innerHTML=h;
+
+  /* graphiques */
+  setC('c1',L,Object.values(D.seg).map(sl));
+  setC('c2',L,[sl(K.new_customers),sl(K.churned_customers).map(x=>-x)]);
+  setC('c3',L,[cr.map(x=>x*100)]);
+  setC('c4',L,[sl(K.arpa)]);
+  setC('c5',L,Object.values(D.plan).map(sl));
+  const nl=D.nrr_months.filter(m=>m>=M[i0]&&m<=M[i1]),n0=D.nrr_months.indexOf(nl[0]);
+  setC('c6',nl,[D.nrr.slice(n0,n0+nl.length),D.logo.slice(n0,n0+nl.length)]);
+  document.querySelectorAll('.end').forEach(p=>p.textContent='Valeur à fin '+M[e]);
+  const t7=topAt(D.country,e),t8=topAt(D.industry,e);
+  setC('c7',t7.map(x=>x[0]),[t7.map(x=>x[1])]);
+  setC('c8',t8.map(x=>x[0]),[t8.map(x=>x[1])]);
+  const lk=Object.keys(lost);setC('c9',lk,[lk.map(k=>lost[k])]);
+  setC('c10',L,[sl(K.revenue),sl(K.mrr)]);
+}
+render();
 </script></body></html>

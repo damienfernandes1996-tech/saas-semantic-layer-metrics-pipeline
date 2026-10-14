@@ -5,20 +5,31 @@
 :root{--bg:#f6f7f9;--card:#fff;--tx:#1a1d23;--mut:#6b7280;--bd:#e5e7eb;--a:#2563eb;--g:#16a34a;--r:#dc2626}
 @media(prefers-color-scheme:dark){:root{--bg:#0f1216;--card:#181c22;--tx:#e8eaed;--mut:#9aa3af;--bd:#2a313a}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,sans-serif}
-header{padding:20px 24px 4px}h1{margin:0;font-size:20px}.sub{color:var(--mut);margin-top:2px}
+header{padding:18px 24px 8px;max-width:1280px;margin:auto}h1{margin:0;font-size:20px}.sub{color:var(--mut);margin-top:2px}
+.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--bd);padding:10px 24px}
+.bar-in{max-width:1280px;margin:auto;display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.bar label{color:var(--mut);font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:999px;padding:5px 12px;font:inherit;cursor:pointer}
+.chip:hover{border-color:var(--a)}.chip.on{background:var(--a);border-color:var(--a);color:#fff}
+.rng{display:flex;align-items:center;gap:6px;margin-left:auto}
+select{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:6px;padding:5px 8px;font:inherit}
 .wrap{padding:16px 24px 32px;max-width:1280px;margin:auto}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
 .card,.panel{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px}
 .card .l{color:var(--mut);font-size:12px}.card .v{font-size:24px;font-weight:650;margin:4px 0 2px}
-.d{font-size:12px}.up{color:var(--g)}.dn{color:var(--r)}
+.d{font-size:12px;color:var(--mut)}.up{color:var(--g)}.dn{color:var(--r)}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px}
 .panel h3{margin:0 0 2px;font-size:14px}.panel p{margin:0 0 8px;color:var(--mut);font-size:12px}
 .panel canvas{max-height:250px}.ins{margin:16px 0;padding:14px;border-left:3px solid var(--a);background:var(--card);border-radius:6px}
-.ins li{margin:4px 0}footer{color:var(--mut);font-size:12px;margin-top:16px}
-@media(max-width:480px){.grid{grid-template-columns:1fr}.wrap{padding:12px 14px}}
+.ins ul{margin:6px 0 0;padding-left:20px}.ins li{margin:4px 0}footer{color:var(--mut);font-size:12px;margin-top:16px}
+@media(max-width:480px){.grid{grid-template-columns:1fr}.wrap,.bar,header{padding-left:14px;padding-right:14px}.rng{margin-left:0}}
 </style></head><body>
-<header><h1>Dashboard KPI — SaaS B2B</h1>
-<div class="sub" id="sub"></div></header>
+<header><h1>Dashboard KPI — SaaS B2B</h1><div class="sub" id="sub"></div></header>
+<div class="bar"><div class="bar-in">
+  <label>Période</label><div class="chips" id="chips"></div>
+  <div class="rng"><label for="f">De</label><select id="f"></select><label for="t">à</label><select id="t"></select></div>
+</div></div>
 <div class="wrap">
 <div class="cards" id="cards"></div>
 <div class="ins"><b>Lecture rapide</b><ul id="ins"></ul></div>
@@ -28,10 +39,10 @@ header{padding:20px 24px 4px}h1{margin:0;font-size:20px}.sub{color:var(--mut);ma
 <div class="panel"><h3>Taux de churn mensuel (%)</h3><p><code>customer_churn_rate</code> = perdus / actifs fin du mois précédent</p><canvas id="c3"></canvas></div>
 <div class="panel"><h3>ARPA (€)</h3><p><code>arpa</code> = MRR / clients actifs</p><canvas id="c4"></canvas></div>
 <div class="panel"><h3>MRR par plan</h3><p>Mix Starter / Growth / Scale</p><canvas id="c5"></canvas></div>
-<div class="panel"><h3>NRR et rétention logo à 12 mois (%)</h3><p>Calculé en SQL sur <code>fct_mrr_snapshot</code></p><canvas id="c6"></canvas></div>
-<div class="panel"><h3>MRR par pays</h3><p id="p7"></p><canvas id="c7"></canvas></div>
-<div class="panel"><h3>MRR par secteur</h3><p id="p8"></p><canvas id="c8"></canvas></div>
-<div class="panel"><h3>MRR perdu par segment (cumul)</h3><p><code>lost_mrr</code> sur toute la période</p><canvas id="c9"></canvas></div>
+<div class="panel"><h3>NRR et rétention logo à 12 mois (%)</h3><p>Calculé en SQL sur <code>fct_mrr_snapshot</code> (disponible dès janv. 2024)</p><canvas id="c6"></canvas></div>
+<div class="panel"><h3>MRR par pays</h3><p class="end"></p><canvas id="c7"></canvas></div>
+<div class="panel"><h3>MRR par secteur</h3><p class="end"></p><canvas id="c8"></canvas></div>
+<div class="panel"><h3>MRR perdu par segment</h3><p>Cumul de <code>lost_mrr</code> sur la période sélectionnée</p><canvas id="c9"></canvas></div>
 <div class="panel"><h3>CA facturé vs MRR (€)</h3><p><code>revenue</code> : factures payées du mois</p><canvas id="c10"></canvas></div>
 </div>
 <footer>Généré par <code>scripts/build_dashboard.py</code> — toutes les métriques proviennent de la couche sémantique MetricFlow ; données synthétiques.</footer>
@@ -52,45 +63,98 @@ header{padding:20px 24px 4px}h1{margin:0;font-size:20px}.sub{color:var(--mut);ma
 //# sourceMappingURL=chart.umd.js.map
 </script>
 <script>
-const D = {"months": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "kpi": {"mrr": [2674.0, 5793.0, 10202.0, 11986.0, 15556.0, 20914.0, 23743.0, 26121.0, 33034.0, 38890.0, 44912.0, 50340.0, 58097.0, 63720.0, 76591.0, 86778.0, 91503.0, 97088.0, 100141.0, 99774.0, 107354.0, 119472.0, 128293.0, 131599.0, 138327.0, 141078.0, 141281.0, 148306.0, 158514.0, 166874.0, 170564.0, 175213.0, 189994.0, 198906.0, 201899.0, 198933.0], "active_customers": [26.0, 57.0, 98.0, 114.0, 144.0, 186.0, 207.0, 229.0, 266.0, 310.0, 338.0, 360.0, 403.0, 430.0, 509.0, 572.0, 597.0, 612.0, 609.0, 576.0, 596.0, 628.0, 657.0, 651.0, 673.0, 672.0, 669.0, 694.0, 736.0, 776.0, 786.0, 787.0, 856.0, 894.0, 901.0, 867.0], "arr": [32088.0, 69516.0, 122424.0, 143832.0, 186672.0, 250968.0, 284916.0, 313452.0, 396408.0, 466680.0, 538944.0, 604080.0, 697164.0, 764640.0, 919092.0, 1041336.0, 1098036.0, 1165056.0, 1201692.0, 1197288.0, 1288248.0, 1433664.0, 1539516.0, 1579188.0, 1659924.0, 1692936.0, 1695372.0, 1779672.0, 1902168.0, 2002488.0, 2046768.0, 2102556.0, 2279928.0, 2386872.0, 2422788.0, 2387196.0], "arpa": [102.8462, 101.6316, 104.102, 105.1404, 108.0278, 112.4409, 114.7005, 114.0655, 124.188, 125.4516, 132.8757, 139.8333, 144.1613, 148.186, 150.4735, 151.7098, 153.2714, 158.6405, 164.4351, 173.2188, 180.1242, 190.242, 195.2709, 202.149, 205.5379, 209.9375, 211.1824, 213.6974, 215.3723, 215.0438, 217.0025, 222.6341, 221.9556, 222.4899, 224.0832, 229.4498], "new_customers": [28.0, 32.0, 42.0, 20.0, 31.0, 43.0, 26.0, 26.0, 43.0, 49.0, 43.0, 34.0, 58.0, 41.0, 92.0, 81.0, 45.0, 34.0, 35.0, 11.0, 73.0, 52.0, 45.0, 23.0, 50.0, 26.0, 24.0, 38.0, 52.0, 53.0, 36.0, 22.0, 93.0, 59.0, 40.0, 0.0], "churned_customers": [0.0, 1.0, 0.0, 4.0, 1.0, 1.0, 5.0, 4.0, 6.0, 5.0, 14.0, 12.0, 15.0, 14.0, 14.0, 16.0, 20.0, 19.0, 37.0, 44.0, 52.0, 21.0, 17.0, 30.0, 28.0, 27.0, 27.0, 13.0, 10.0, 13.0, 26.0, 21.0, 24.0, 21.0, 33.0, 34.0], "lost_mrr": [0.0, 49.0, 0.0, 296.0, 49.0, 49.0, 445.0, 396.0, 694.0, 545.0, 1086.0, 988.0, 1235.0, 1086.0, 1986.0, 2284.0, 2530.0, 1881.0, 4113.0, 4906.0, 6548.0, 2779.0, 3283.0, 4470.0, 3572.0, 3673.0, 4323.0, 1437.0, 1090.0, 1837.0, 3974.0, 2579.0, 3626.0, 2929.0, 4717.0, 4966.0], "customer_churn_rate": [0.0, 0.0385, 0.0, 0.0408, 0.0088, 0.0069, 0.0269, 0.0193, 0.0262, 0.0188, 0.0452, 0.0355, 0.0417, 0.0347, 0.0326, 0.0314, 0.035, 0.0318, 0.0605, 0.0722, 0.0903, 0.0352, 0.0271, 0.0457, 0.043, 0.0401, 0.0402, 0.0194, 0.0144, 0.0177, 0.0335, 0.0267, 0.0305, 0.0245, 0.0369, 0.0377], "revenue": [2327.0, 5446.0, 9508.0, 11194.0, 14317.0, 19675.0, 22900.0, 24982.0, 31153.0, 36906.0, 41682.0, 47316.0, 54324.0, 60196.0, 71870.0, 82516.0, 85351.0, 90284.0, 92439.0, 93760.0, 101286.0, 112459.0, 121129.0, 123693.0, 128375.0, 134569.0, 135267.0, 140390.0, 149052.0, 155924.0, 160859.0, 161866.0, 176498.0, 185025.0, 189160.0, 189778.0]}, "seg": {"Mid-Market": [943.0, 2084.0, 2976.0, 3821.0, 5758.0, 7495.0, 8042.0, 9034.0, 11472.0, 14560.0, 17349.0, 20984.0, 24314.0, 27400.0, 31234.0, 35759.0, 36804.0, 37651.0, 38499.0, 39506.0, 44391.0, 49126.0, 51565.0, 52472.0, 55512.0, 57708.0, 58108.0, 61397.0, 66478.0, 69468.0, 71910.0, 72707.0, 77735.0, 80923.0, 81574.0, 82330.0], "SMB": [1135.0, 2517.0, 3501.0, 4440.0, 5924.0, 7608.0, 8996.0, 10233.0, 11766.0, 14284.0, 16671.0, 17767.0, 19550.0, 20789.0, 26884.0, 30152.0, 31188.0, 32585.0, 33891.0, 32565.0, 31722.0, 36509.0, 41045.0, 41252.0, 41998.0, 42154.0, 41707.0, 42453.0, 44787.0, 46518.0, 45920.0, 47378.0, 49257.0, 51991.0, 53732.0, 51606.0], "Enterprise": [596.0, 1192.0, 3725.0, 3725.0, 3874.0, 5811.0, 6705.0, 6854.0, 9796.0, 10046.0, 10892.0, 11589.0, 14233.0, 15531.0, 18473.0, 20867.0, 23511.0, 26852.0, 27751.0, 27703.0, 31241.0, 33837.0, 35683.0, 37875.0, 40817.0, 41216.0, 41466.0, 44456.0, 47249.0, 50888.0, 52734.0, 55128.0, 63002.0, 65992.0, 66593.0, 64997.0]}, "plan": {"Starter": [588.0, 1323.0, 2156.0, 2450.0, 2891.0, 3332.0, 3479.0, 3920.0, 4459.0, 5782.0, 5733.0, 5782.0, 6468.0, 6909.0, 8085.0, 9163.0, 9898.0, 9604.0, 9114.0, 8232.0, 7938.0, 7644.0, 7154.0, 7056.0, 6958.0, 6517.0, 6566.0, 6664.0, 7301.0, 7840.0, 7987.0, 7252.0, 8232.0, 8722.0, 8869.0, 7840.0], "Growth": [2086.0, 4470.0, 8046.0, 9536.0, 12665.0, 17582.0, 20264.0, 22201.0, 24585.0, 25926.0, 29204.0, 30992.0, 33674.0, 34866.0, 40975.0, 45296.0, 45296.0, 46786.0, 46339.0, 42465.0, 43955.0, 45594.0, 49319.0, 46339.0, 47978.0, 47978.0, 46935.0, 48276.0, 49468.0, 51703.0, 51256.0, 51852.0, 55279.0, 56918.0, 56173.0, 54236.0], "Scale": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3990.0, 7182.0, 9975.0, 13566.0, 17955.0, 21945.0, 27531.0, 32319.0, 36309.0, 40698.0, 44688.0, 49077.0, 55461.0, 66234.0, 71820.0, 78204.0, 83391.0, 86583.0, 87780.0, 93366.0, 101745.0, 107331.0, 111321.0, 116109.0, 126483.0, 133266.0, 136857.0, 136857.0]}, "country": {"France": 69151.0, "Germany": 34405.0, "United Kingdom": 27226.0, "Spain": 22953.0, "Italy": 15529.0, "Netherlands": 12737.0, "Belgium": 10556.0, "Switzerland": 6376.0}, "industry": {"Finance": 35853.0, "Software": 35698.0, "Retail": 32157.0, "Manufacturing": 31263.0, "Healthcare": 29516.0, "Logistics": 26289.0, "Unknown": 8157.0}, "churn_seg": {"Enterprise": {"churned_customers": 41, "lost_mrr": 11109.0}, "Mid-Market": {"churned_customers": 158, "lost_mrr": 26842.0}, "SMB": {"churned_customers": 430, "lost_mrr": 42470.0}}, "nrr_months": ["2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "nrr": [113.4, 111.5, 109.1, 115.3, 105.1, 104.6, 103.9, 100.5, 87.9, 91.5, 94.6, 90.7, 90.1, 91.4, 87.9, 89.2, 90.9, 90.6, 91.7, 93.4, 97.1, 94.1, 91.8, 91.4], "logo": [65.4, 70.2, 71.4, 71.9, 66.7, 68.8, 67.6, 62.0, 56.0, 54.5, 57.1, 56.1, 57.1, 58.1, 57.8, 58.4, 59.1, 60.5, 61.9, 65.1, 69.5, 70.7, 69.6, 70.5], "cards": {"mrr": 198933.0, "mrr_yoy": 0.5116604229515422, "arr": 2387196.0, "active": 867, "active_yoy": 0.33179723502304137, "arpa": 229.44982698961937, "arpa_yoy": 0.1350529819393933, "churn3": 0.033060437004943266, "nrr": 91.4, "logo": 70.5, "month": "2025-12"}};
+const D = {"months": ["2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "kpi": {"mrr": [2674.0, 5793.0, 10202.0, 11986.0, 15556.0, 20914.0, 23743.0, 26121.0, 33034.0, 38890.0, 44912.0, 50340.0, 58097.0, 63720.0, 76591.0, 86778.0, 91503.0, 97088.0, 100141.0, 99774.0, 107354.0, 119472.0, 128293.0, 131599.0, 138327.0, 141078.0, 141281.0, 148306.0, 158514.0, 166874.0, 170564.0, 175213.0, 189994.0, 198906.0, 201899.0, 198933.0], "active_customers": [26.0, 57.0, 98.0, 114.0, 144.0, 186.0, 207.0, 229.0, 266.0, 310.0, 338.0, 360.0, 403.0, 430.0, 509.0, 572.0, 597.0, 612.0, 609.0, 576.0, 596.0, 628.0, 657.0, 651.0, 673.0, 672.0, 669.0, 694.0, 736.0, 776.0, 786.0, 787.0, 856.0, 894.0, 901.0, 867.0], "arr": [32088.0, 69516.0, 122424.0, 143832.0, 186672.0, 250968.0, 284916.0, 313452.0, 396408.0, 466680.0, 538944.0, 604080.0, 697164.0, 764640.0, 919092.0, 1041336.0, 1098036.0, 1165056.0, 1201692.0, 1197288.0, 1288248.0, 1433664.0, 1539516.0, 1579188.0, 1659924.0, 1692936.0, 1695372.0, 1779672.0, 1902168.0, 2002488.0, 2046768.0, 2102556.0, 2279928.0, 2386872.0, 2422788.0, 2387196.0], "arpa": [102.8462, 101.6316, 104.102, 105.1404, 108.0278, 112.4409, 114.7005, 114.0655, 124.188, 125.4516, 132.8757, 139.8333, 144.1613, 148.186, 150.4735, 151.7098, 153.2714, 158.6405, 164.4351, 173.2188, 180.1242, 190.242, 195.2709, 202.149, 205.5379, 209.9375, 211.1824, 213.6974, 215.3723, 215.0438, 217.0025, 222.6341, 221.9556, 222.4899, 224.0832, 229.4498], "new_customers": [28.0, 32.0, 42.0, 20.0, 31.0, 43.0, 26.0, 26.0, 43.0, 49.0, 43.0, 34.0, 58.0, 41.0, 92.0, 81.0, 45.0, 34.0, 35.0, 11.0, 73.0, 52.0, 45.0, 23.0, 50.0, 26.0, 24.0, 38.0, 52.0, 53.0, 36.0, 22.0, 93.0, 59.0, 40.0, 0.0], "churned_customers": [0.0, 1.0, 0.0, 4.0, 1.0, 1.0, 5.0, 4.0, 6.0, 5.0, 14.0, 12.0, 15.0, 14.0, 14.0, 16.0, 20.0, 19.0, 37.0, 44.0, 52.0, 21.0, 17.0, 30.0, 28.0, 27.0, 27.0, 13.0, 10.0, 13.0, 26.0, 21.0, 24.0, 21.0, 33.0, 34.0], "lost_mrr": [0.0, 49.0, 0.0, 296.0, 49.0, 49.0, 445.0, 396.0, 694.0, 545.0, 1086.0, 988.0, 1235.0, 1086.0, 1986.0, 2284.0, 2530.0, 1881.0, 4113.0, 4906.0, 6548.0, 2779.0, 3283.0, 4470.0, 3572.0, 3673.0, 4323.0, 1437.0, 1090.0, 1837.0, 3974.0, 2579.0, 3626.0, 2929.0, 4717.0, 4966.0], "customer_churn_rate": [0.0, 0.0385, 0.0, 0.0408, 0.0088, 0.0069, 0.0269, 0.0193, 0.0262, 0.0188, 0.0452, 0.0355, 0.0417, 0.0347, 0.0326, 0.0314, 0.035, 0.0318, 0.0605, 0.0722, 0.0903, 0.0352, 0.0271, 0.0457, 0.043, 0.0401, 0.0402, 0.0194, 0.0144, 0.0177, 0.0335, 0.0267, 0.0305, 0.0245, 0.0369, 0.0377], "revenue": [2327.0, 5446.0, 9508.0, 11194.0, 14317.0, 19675.0, 22900.0, 24982.0, 31153.0, 36906.0, 41682.0, 47316.0, 54324.0, 60196.0, 71870.0, 82516.0, 85351.0, 90284.0, 92439.0, 93760.0, 101286.0, 112459.0, 121129.0, 123693.0, 128375.0, 134569.0, 135267.0, 140390.0, 149052.0, 155924.0, 160859.0, 161866.0, 176498.0, 185025.0, 189160.0, 189778.0]}, "seg": {"Enterprise": [596.0, 1192.0, 3725.0, 3725.0, 3874.0, 5811.0, 6705.0, 6854.0, 9796.0, 10046.0, 10892.0, 11589.0, 14233.0, 15531.0, 18473.0, 20867.0, 23511.0, 26852.0, 27751.0, 27703.0, 31241.0, 33837.0, 35683.0, 37875.0, 40817.0, 41216.0, 41466.0, 44456.0, 47249.0, 50888.0, 52734.0, 55128.0, 63002.0, 65992.0, 66593.0, 64997.0], "Mid-Market": [943.0, 2084.0, 2976.0, 3821.0, 5758.0, 7495.0, 8042.0, 9034.0, 11472.0, 14560.0, 17349.0, 20984.0, 24314.0, 27400.0, 31234.0, 35759.0, 36804.0, 37651.0, 38499.0, 39506.0, 44391.0, 49126.0, 51565.0, 52472.0, 55512.0, 57708.0, 58108.0, 61397.0, 66478.0, 69468.0, 71910.0, 72707.0, 77735.0, 80923.0, 81574.0, 82330.0], "SMB": [1135.0, 2517.0, 3501.0, 4440.0, 5924.0, 7608.0, 8996.0, 10233.0, 11766.0, 14284.0, 16671.0, 17767.0, 19550.0, 20789.0, 26884.0, 30152.0, 31188.0, 32585.0, 33891.0, 32565.0, 31722.0, 36509.0, 41045.0, 41252.0, 41998.0, 42154.0, 41707.0, 42453.0, 44787.0, 46518.0, 45920.0, 47378.0, 49257.0, 51991.0, 53732.0, 51606.0]}, "plan": {"Starter": [588.0, 1323.0, 2156.0, 2450.0, 2891.0, 3332.0, 3479.0, 3920.0, 4459.0, 5782.0, 5733.0, 5782.0, 6468.0, 6909.0, 8085.0, 9163.0, 9898.0, 9604.0, 9114.0, 8232.0, 7938.0, 7644.0, 7154.0, 7056.0, 6958.0, 6517.0, 6566.0, 6664.0, 7301.0, 7840.0, 7987.0, 7252.0, 8232.0, 8722.0, 8869.0, 7840.0], "Growth": [2086.0, 4470.0, 8046.0, 9536.0, 12665.0, 17582.0, 20264.0, 22201.0, 24585.0, 25926.0, 29204.0, 30992.0, 33674.0, 34866.0, 40975.0, 45296.0, 45296.0, 46786.0, 46339.0, 42465.0, 43955.0, 45594.0, 49319.0, 46339.0, 47978.0, 47978.0, 46935.0, 48276.0, 49468.0, 51703.0, 51256.0, 51852.0, 55279.0, 56918.0, 56173.0, 54236.0], "Scale": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3990.0, 7182.0, 9975.0, 13566.0, 17955.0, 21945.0, 27531.0, 32319.0, 36309.0, 40698.0, 44688.0, 49077.0, 55461.0, 66234.0, 71820.0, 78204.0, 83391.0, 86583.0, 87780.0, 93366.0, 101745.0, 107331.0, 111321.0, 116109.0, 126483.0, 133266.0, 136857.0, 136857.0]}, "country": {"Belgium": [0.0, 545.0, 743.0, 892.0, 1339.0, 1537.0, 1637.0, 1537.0, 2085.0, 2085.0, 2085.0, 2432.0, 3229.0, 2980.0, 3924.0, 4371.0, 4271.0, 4621.0, 5020.0, 4822.0, 4621.0, 5468.0, 5864.0, 5914.0, 5366.0, 6016.0, 5967.0, 6317.0, 7513.0, 7513.0, 7662.0, 7713.0, 8907.0, 9657.0, 10255.0, 10556.0], "France": [1039.0, 1682.0, 3417.0, 3911.0, 5001.0, 7185.0, 7730.0, 8822.0, 11005.0, 13637.0, 16323.0, 18965.0, 21449.0, 24136.0, 29610.0, 34190.0, 35678.0, 37823.0, 36833.0, 37541.0, 38345.0, 42680.0, 47318.0, 48719.0, 51164.0, 51370.0, 50723.0, 53114.0, 55500.0, 59183.0, 60685.0, 62283.0, 67553.0, 70586.0, 71384.0, 69151.0], "Germany": [396.0, 1188.0, 2180.0, 2478.0, 2576.0, 3270.0, 3419.0, 3815.0, 4561.0, 5948.0, 7041.0, 7090.0, 8036.0, 9379.0, 11811.0, 12603.0, 12305.0, 13252.0, 12806.0, 12863.0, 16254.0, 19897.0, 20199.0, 21195.0, 23288.0, 24437.0, 24590.0, 25488.0, 26430.0, 28123.0, 27973.0, 28925.0, 31066.0, 33756.0, 34202.0, 34405.0], "Italy": [198.0, 396.0, 545.0, 743.0, 892.0, 1090.0, 1486.0, 1933.0, 2281.0, 2678.0, 3826.0, 4574.0, 5418.0, 6018.0, 6165.0, 7007.0, 7057.0, 7654.0, 8552.0, 8454.0, 9752.0, 10199.0, 10646.0, 10549.0, 10847.0, 11395.0, 11395.0, 11892.0, 12888.0, 13783.0, 13783.0, 13734.0, 15230.0, 16175.0, 16075.0, 15529.0], "Netherlands": [0.0, 296.0, 543.0, 592.0, 790.0, 1633.0, 1980.0, 2276.0, 2574.0, 2623.0, 3122.0, 3619.0, 3668.0, 3668.0, 4663.0, 5060.0, 6305.0, 6207.0, 6657.0, 6412.0, 7007.0, 7156.0, 8252.0, 8904.0, 9701.0, 9801.0, 9600.0, 10248.0, 11393.0, 11442.0, 11738.0, 12338.0, 12636.0, 13184.0, 12935.0, 12737.0], "Spain": [594.0, 1190.0, 1537.0, 1835.0, 2431.0, 2827.0, 3225.0, 3225.0, 4720.0, 5415.0, 5811.0, 6557.0, 7403.0, 7601.0, 8045.0, 10233.0, 10233.0, 10781.0, 11879.0, 11533.0, 12081.0, 13529.0, 15173.0, 15224.0, 15275.0, 15723.0, 15674.0, 16320.0, 18364.0, 18960.0, 20356.0, 21456.0, 22900.0, 22701.0, 22950.0, 22953.0], "Switzerland": [0.0, 0.0, 49.0, 198.0, 347.0, 347.0, 496.0, 545.0, 993.0, 1042.0, 1091.0, 1091.0, 1189.0, 1338.0, 1736.0, 1983.0, 2529.0, 2778.0, 3225.0, 2878.0, 3079.0, 3678.0, 3928.0, 4379.0, 4976.0, 5174.0, 5223.0, 5822.0, 6471.0, 6471.0, 6721.0, 6322.0, 6073.0, 6324.0, 6424.0, 6376.0], "United Kingdom": [447.0, 496.0, 1188.0, 1337.0, 2180.0, 3025.0, 3770.0, 3968.0, 4815.0, 5462.0, 5613.0, 6012.0, 7705.0, 8600.0, 10637.0, 11331.0, 13125.0, 13972.0, 15169.0, 15271.0, 16215.0, 16865.0, 16913.0, 16715.0, 17710.0, 17162.0, 18109.0, 19105.0, 19955.0, 21399.0, 21646.0, 22442.0, 25629.0, 26523.0, 27674.0, 27226.0]}, "industry": {"Finance": [347.0, 892.0, 1288.0, 1784.0, 2429.0, 3223.0, 3521.0, 3768.0, 4514.0, 5600.0, 6595.0, 6993.0, 7736.0, 8833.0, 10768.0, 12362.0, 12560.0, 13056.0, 13362.0, 12967.0, 15757.0, 17751.0, 19994.0, 20646.0, 21642.0, 22989.0, 22992.0, 24688.0, 25581.0, 27472.0, 28319.0, 28921.0, 32752.0, 34946.0, 36845.0, 35853.0], "Healthcare": [594.0, 941.0, 1933.0, 2082.0, 2578.0, 2925.0, 3621.0, 3968.0, 5409.0, 6202.0, 7648.0, 8395.0, 10189.0, 11033.0, 13022.0, 14306.0, 14803.0, 14705.0, 16001.0, 16308.0, 17656.0, 19900.0, 20597.0, 20397.0, 21843.0, 22096.0, 21848.0, 22793.0, 23441.0, 24086.0, 24883.0, 25733.0, 27973.0, 29565.0, 29413.0, 29516.0], "Logistics": [396.0, 694.0, 1537.0, 1933.0, 2031.0, 3319.0, 3815.0, 4260.0, 5552.0, 6993.0, 8736.0, 10032.0, 11423.0, 11922.0, 13264.0, 14710.0, 14906.0, 16401.0, 16598.0, 16205.0, 15714.0, 16814.0, 18412.0, 17267.0, 18312.0, 17864.0, 18512.0, 19209.0, 22247.0, 22948.0, 22946.0, 23894.0, 25386.0, 26779.0, 26881.0, 26289.0], "Manufacturing": [0.0, 643.0, 1239.0, 1437.0, 2231.0, 3223.0, 3521.0, 3817.0, 4862.0, 5707.0, 5807.0, 6952.0, 7747.0, 8295.0, 11227.0, 12965.0, 13411.0, 14108.0, 14362.0, 14516.0, 14864.0, 18204.0, 19600.0, 21197.0, 21900.0, 22500.0, 22500.0, 23747.0, 26038.0, 27976.0, 28373.0, 28574.0, 29768.0, 31108.0, 31708.0, 31263.0], "Retail": [694.0, 1039.0, 1929.0, 2476.0, 2872.0, 3319.0, 3666.0, 4062.0, 5656.0, 5855.0, 6405.0, 7199.0, 8143.0, 8839.0, 9880.0, 11917.0, 13063.0, 13610.0, 13511.0, 13416.0, 15409.0, 17402.0, 18101.0, 19999.0, 21143.0, 21689.0, 21990.0, 22738.0, 24484.0, 26271.0, 27069.0, 28167.0, 31404.0, 32253.0, 32353.0, 32157.0], "Software": [643.0, 1188.0, 1633.0, 1533.0, 2425.0, 3568.0, 3964.0, 4313.0, 5010.0, 6353.0, 7392.0, 8242.0, 9784.0, 11674.0, 14509.0, 15952.0, 17098.0, 19047.0, 20146.0, 20099.0, 21094.0, 22142.0, 23931.0, 24882.0, 25929.0, 26531.0, 26030.0, 26776.0, 28568.0, 29917.0, 30818.0, 32115.0, 34354.0, 35898.0, 36393.0, 35698.0], "Unknown": [0.0, 396.0, 643.0, 741.0, 990.0, 1337.0, 1635.0, 1933.0, 2031.0, 2180.0, 2329.0, 2527.0, 3075.0, 3124.0, 3921.0, 4566.0, 5662.0, 6161.0, 6161.0, 6263.0, 6860.0, 7259.0, 7658.0, 7211.0, 7558.0, 7409.0, 7409.0, 8355.0, 8155.0, 8204.0, 8156.0, 7809.0, 8357.0, 8357.0, 8306.0, 8157.0]}, "lost_seg": {"Enterprise": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 298.0, 0.0, 149.0, 0.0, 0.0, 0.0, 1096.0, 149.0, 149.0, 399.0, 298.0, 447.0, 947.0, 149.0, 399.0, 399.0, 149.0, 1096.0, 947.0, 0.0, 0.0, 0.0, 399.0, 399.0, 798.0, 0.0, 846.0, 1596.0], "Mid-Market": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 347.0, 149.0, 0.0, 396.0, 0.0, 149.0, 645.0, 198.0, 347.0, 995.0, 1044.0, 645.0, 1541.0, 1588.0, 1192.0, 1241.0, 2192.0, 1790.0, 1542.0, 1144.0, 846.0, 347.0, 149.0, 298.0, 1245.0, 1194.0, 894.0, 1293.0, 2487.0, 944.0], "SMB": [0.0, 49.0, 0.0, 296.0, 49.0, 49.0, 98.0, 247.0, 396.0, 149.0, 937.0, 839.0, 590.0, 888.0, 543.0, 1140.0, 1337.0, 837.0, 2274.0, 2871.0, 4409.0, 1389.0, 692.0, 2281.0, 1881.0, 1433.0, 2530.0, 1090.0, 941.0, 1539.0, 2330.0, 986.0, 1934.0, 1636.0, 1384.0, 2426.0]}, "churn_seg": {"Enterprise": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 1.0, 0.0, 0.0, 0.0, 4.0, 1.0, 1.0, 1.0, 2.0, 3.0, 3.0, 1.0, 1.0, 1.0, 1.0, 4.0, 3.0, 0.0, 0.0, 0.0, 1.0, 1.0, 2.0, 0.0, 4.0, 4.0], "Mid-Market": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.0, 1.0, 0.0, 4.0, 0.0, 1.0, 5.0, 2.0, 3.0, 5.0, 6.0, 5.0, 9.0, 12.0, 8.0, 9.0, 8.0, 10.0, 8.0, 6.0, 4.0, 3.0, 1.0, 2.0, 5.0, 6.0, 6.0, 7.0, 13.0, 6.0], "SMB": [0.0, 1.0, 0.0, 4.0, 1.0, 1.0, 2.0, 3.0, 4.0, 1.0, 13.0, 11.0, 10.0, 12.0, 7.0, 10.0, 13.0, 13.0, 26.0, 29.0, 41.0, 11.0, 8.0, 19.0, 19.0, 17.0, 20.0, 10.0, 9.0, 11.0, 20.0, 14.0, 16.0, 14.0, 16.0, 24.0]}, "nrr_months": ["2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12"], "nrr": [113.4, 111.5, 109.1, 115.3, 105.1, 104.6, 103.9, 100.5, 87.9, 91.5, 94.6, 90.7, 90.1, 91.4, 87.9, 89.2, 90.9, 90.6, 91.7, 93.4, 97.1, 94.1, 91.8, 91.4], "logo": [65.4, 70.2, 71.4, 71.9, 66.7, 68.8, 67.6, 62.0, 56.0, 54.5, 57.1, 56.1, 57.1, 58.1, 57.8, 58.4, 59.1, 60.5, 61.9, 65.1, 69.5, 70.7, 69.6, 70.5]};
+const M=D.months,N=M.length,K=D.kpi;
 const fmt=n=>new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0}).format(n);
 const pct=(x,d=1)=>(x*100).toFixed(d).replace('.',',')+' %';
-const c=D.cards;
-document.getElementById('sub').textContent='Situation à fin '+c.month+' · 1 500 clients simulés · janv. 2023 – déc. 2025';
-const card=(l,v,d,good=true)=>`<div class="card"><div class="l">${l}</div><div class="v">${v}</div><div class="d ${d==null?'':(good?'up':'dn')}">${d??''}</div></div>`;
-document.getElementById('cards').innerHTML=
- card('MRR',fmt(c.mrr)+' €','▲ '+pct(c.mrr_yoy,0)+' sur 12 mois')+
- card('ARR',fmt(c.arr)+' €',null)+
- card('Clients actifs',fmt(c.active),'▲ '+pct(c.active_yoy,0)+' sur 12 mois')+
- card('ARPA',fmt(c.arpa)+' €','▲ '+pct(c.arpa_yoy,0)+' sur 12 mois')+
- card('Churn mensuel (moy. 3 mois)',pct(c.churn3,2),null)+
- card('NRR 12 mois',c.nrr.toFixed(0)+' %',c.nrr>=100?'expansion > churn':'churn > expansion',c.nrr>=100)+
- card('Rétention logo 12 mois',c.logo.toFixed(0)+' %',null);
-const segs=Object.keys(D.seg), tot=Object.values(D.country).reduce((a,b)=>a+b,0);
-const lastSeg=segs.map(s=>[s,D.seg[s].at(-1)]).sort((a,b)=>b[1]-a[1]);
-const cs=D.churn_seg, worst=Object.entries(cs).sort((a,b)=>b[1].lost_mrr-a[1].lost_mrr)[0];
-const topC=Object.entries(D.country)[0];
-const cr=D.kpi.customer_churn_rate, imax=cr.indexOf(Math.max(...cr));
-document.getElementById('ins').innerHTML=
- `<li>Le MRR atteint <b>${fmt(c.mrr)} €</b> (${pct(c.mrr_yoy,0)} sur un an), porté par ${fmt(c.active)} clients actifs.</li>`+
- `<li>Segment n°1 : <b>${lastSeg[0][0]}</b> (${pct(lastSeg[0][1]/c.mrr,0)} du MRR).</li>`+
- `<li>NRR à <b>${c.nrr.toFixed(0)} %</b> : ${c.nrr>=100?'les upgrades compensent le churn sur la base existante.':'la base existante se contracte ; la croissance dépend de l\'acquisition.'}</li>`+
- `<li>Pic de churn en <b>${D.months[imax]}</b> : ${pct(cr[imax])} des clients perdus en un mois (hausse de prix simulée), puis retour progressif à la normale.</li>`+
- `<li>Le segment <b>${worst[0]}</b> concentre le plus de MRR perdu (${fmt(worst[1].lost_mrr)} € cumulés) ; premier pays : ${topC[0]} (${pct(topC[1]/tot,0)}).</li>`;
+const sum=a=>a.reduce((x,y)=>x+y,0);
+let i0=0,i1=N-1;
+const sl=a=>a.slice(i0,i1+1);
+
+/* ---- filtres ---- */
+const mkOpts=el=>{el.innerHTML=M.map((m,i)=>`<option value="${i}">${m}</option>`).join('')};
+const selF=document.getElementById('f'),selT=document.getElementById('t');mkOpts(selF);mkOpts(selT);
+const years=[...new Set(M.map(m=>m.slice(0,4)))];
+const presets=[['Tout',0,N-1],...years.map(y=>[y,M.findIndex(m=>m.startsWith(y)),M.map(m=>m.slice(0,4)).lastIndexOf(y)]),
+  ['12 derniers mois',N-12,N-1],['6 derniers mois',N-6,N-1]];
+const chips=document.getElementById('chips');
+presets.forEach(([lab,a,b])=>{const e=document.createElement('button');e.className='chip';e.textContent=lab;e.dataset.a=a;e.dataset.b=b;
+  e.onclick=()=>{i0=a;i1=b;render()};chips.appendChild(e)});
+selF.onchange=()=>{i0=+selF.value;if(i0>i1)i1=i0;render()};
+selT.onchange=()=>{i1=+selT.value;if(i1<i0)i0=i1;render()};
+
+/* ---- graphiques ---- */
 const col=['#2563eb','#f59e0b','#16a34a','#dc2626','#8b5cf6','#0891b2','#db2777','#64748b'];
 Chart.defaults.font.size=11;Chart.defaults.color=getComputedStyle(document.body).getPropertyValue('--mut')||'#6b7280';
-const mk=(id,type,labels,ds,o={})=>new Chart(document.getElementById(id),{type,data:{labels,datasets:ds},options:Object.assign({responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:ds.length>1}},elements:{point:{radius:0}}},o)});
+const CH={};
+const mk=(id,type,ds,o={})=>CH[id]=new Chart(document.getElementById(id),{type,data:{labels:[],datasets:ds},options:Object.assign({responsive:true,interaction:{mode:'index',intersect:false},plugins:{legend:{display:ds.length>1}},elements:{point:{radius:0}},animation:{duration:250}},o)});
+const xt={x:{ticks:{maxTicksLimit:8}}};
 const stack={scales:{x:{stacked:true,ticks:{maxTicksLimit:8}},y:{stacked:true}}};
-const ds=(o,i)=>Object.keys(o).map((k,j)=>({label:k,data:o[k],backgroundColor:col[j]+'cc',borderColor:col[j],fill:true,borderWidth:1}));
-mk('c1','line',D.months,ds(D.seg),stack);
-mk('c2','bar',D.months,[{label:'Nouveaux',data:D.kpi.new_customers,backgroundColor:'#16a34a'},{label:'Perdus',data:D.kpi.churned_customers.map(x=>-x),backgroundColor:'#dc2626'}],{scales:{x:{stacked:true,ticks:{maxTicksLimit:8}},y:{stacked:true}}});
-mk('c3','line',D.months,[{label:'Churn',data:D.kpi.customer_churn_rate.map(x=>x*100),borderColor:col[3],borderWidth:2}],{scales:{x:{ticks:{maxTicksLimit:8}}}});
-mk('c4','line',D.months,[{label:'ARPA',data:D.kpi.arpa,borderColor:col[0],borderWidth:2}],{scales:{x:{ticks:{maxTicksLimit:8}}}});
-mk('c5','line',D.months,ds(D.plan),stack);
-mk('c6','line',D.nrr_months,[{label:'NRR',data:D.nrr,borderColor:col[0],borderWidth:2},{label:'Rétention logo',data:D.logo,borderColor:col[1],borderWidth:2}],{scales:{x:{ticks:{maxTicksLimit:8}}}});
-const bar=(id,o)=>mk(id,'bar',Object.keys(o),[{data:Object.values(o),backgroundColor:col[0]}],{indexAxis:'y',plugins:{legend:{display:false}}});
-document.getElementById('p7').textContent='Fin '+c.month;document.getElementById('p8').textContent='Fin '+c.month;
-bar('c7',D.country);bar('c8',D.industry);
-mk('c9','bar',Object.keys(cs),[{data:Object.values(cs).map(x=>x.lost_mrr),backgroundColor:col[3]}],{plugins:{legend:{display:false}}});
-mk('c10','line',D.months,[{label:'CA facturé',data:D.kpi.revenue,borderColor:col[2],borderWidth:2},{label:'MRR',data:D.kpi.mrr,borderColor:col[0],borderWidth:2,borderDash:[4,3]}],{scales:{x:{ticks:{maxTicksLimit:8}}}});
+const area=(o)=>Object.keys(o).map((k,j)=>({label:k,data:[],backgroundColor:col[j]+'cc',borderColor:col[j],fill:true,borderWidth:1}));
+mk('c1','line',area(D.seg),stack);
+mk('c2','bar',[{label:'Nouveaux',data:[],backgroundColor:'#16a34a'},{label:'Perdus',data:[],backgroundColor:'#dc2626'}],stack);
+mk('c3','line',[{label:'Churn',data:[],borderColor:col[3],borderWidth:2}],{scales:xt});
+mk('c4','line',[{label:'ARPA',data:[],borderColor:col[0],borderWidth:2}],{scales:xt});
+mk('c5','line',area(D.plan),stack);
+mk('c6','line',[{label:'NRR',data:[],borderColor:col[0],borderWidth:2},{label:'Rétention logo',data:[],borderColor:col[1],borderWidth:2}],{scales:xt});
+const hbar=id=>mk(id,'bar',[{data:[],backgroundColor:col[0]}],{indexAxis:'y',plugins:{legend:{display:false}}});
+hbar('c7');hbar('c8');
+mk('c9','bar',[{data:[],backgroundColor:col[3]}],{plugins:{legend:{display:false}}});
+mk('c10','line',[{label:'CA facturé',data:[],borderColor:col[2],borderWidth:2},{label:'MRR',data:[],borderColor:col[0],borderWidth:2,borderDash:[4,3]}],{scales:xt});
+
+function setC(id,labels,sets){const c=CH[id];c.data.labels=labels;sets.forEach((d,i)=>c.data.datasets[i].data=d);c.update();}
+const topAt=(o,i)=>Object.entries(o).map(([k,v])=>[k,v[i]]).sort((a,b)=>b[1]-a[1]);
+
+function render(){
+  const L=sl(M),len=L.length;
+  /* filtres : état visuel */
+  selF.value=i0;selT.value=i1;
+  chips.querySelectorAll('.chip').forEach(e=>e.classList.toggle('on',+e.dataset.a===i0&&+e.dataset.b===i1));
+  document.getElementById('sub').textContent=`Période : ${M[i0]} → ${M[i1]} · ${len} mois · 1 500 clients simulés`;
+
+  /* cartes */
+  const e=i1,base=e-12>=0?e-12:i0,lab=e-12>=0?'sur 12 mois':'depuis '+M[i0];
+  const dl=(k)=>{if(base>=e||!K[k][base])return null;const x=K[k][e]/K[k][base]-1;return{t:(x>=0?'▲ ':'▼ ')+pct(Math.abs(x),0)+' '+lab,g:x>=0}};
+  const card=(l,v,d)=>`<div class="card"><div class="l">${l}</div><div class="v">${v}</div><div class="d ${d?(d.g?'up':'dn'):''}">${d?d.t:'&nbsp;'}</div></div>`;
+  const cr=sl(K.customer_churn_rate),c3=cr.slice(-3),c3m=sum(c3)/c3.length;
+  const ni=D.nrr_months.indexOf(M[e]),nrr=ni>=0?D.nrr[ni]:null,logo=ni>=0?D.logo[ni]:null;
+  document.getElementById('cards').innerHTML=
+    card('MRR (fin de période)',fmt(K.mrr[e])+' €',dl('mrr'))+
+    card('ARR',fmt(K.arr[e])+' €',null)+
+    card('Clients actifs',fmt(K.active_customers[e]),dl('active_customers'))+
+    card('ARPA',fmt(K.arpa[e])+' €',dl('arpa'))+
+    card('Nouveaux clients (période)',fmt(sum(sl(K.new_customers))),null)+
+    card('Clients perdus (période)',fmt(sum(sl(K.churned_customers))),null)+
+    card('Churn mensuel (moy. '+c3.length+' mois)',pct(c3m,2),null)+
+    card('NRR 12 mois',nrr==null?'n/d':nrr.toFixed(0)+' %',nrr==null?null:{t:nrr>=100?'expansion > churn':'churn > expansion',g:nrr>=100})+
+    card('Rétention logo 12 mois',logo==null?'n/d':logo.toFixed(0)+' %',null);
+
+  /* lecture rapide */
+  const segTop=topAt(D.seg,e)[0],lost={};Object.entries(D.lost_seg).forEach(([k,v])=>lost[k]=sum(sl(v)));
+  const worst=Object.entries(lost).sort((a,b)=>b[1]-a[1])[0],ctry=topAt(D.country,e),totC=sum(ctry.map(x=>x[1]));
+  const imax=cr.indexOf(Math.max(...cr));
+  const g=dl('mrr');
+  let h=`<li>MRR de <b>${fmt(K.mrr[e])} €</b> fin ${M[e]}${g?` (${g.t.replace(/^[▲▼] /,g.g?'+':'−')})`:''}, ${fmt(K.active_customers[e])} clients actifs.</li>`;
+  h+=`<li>Segment n°1 : <b>${segTop[0]}</b> (${pct(segTop[1]/K.mrr[e],0)} du MRR) ; premier pays : <b>${ctry[0][0]}</b> (${pct(ctry[0][1]/totC,0)}).</li>`;
+  if(nrr!=null)h+=`<li>NRR à <b>${nrr.toFixed(0)} %</b> : ${nrr>=100?'les upgrades compensent le churn sur la base existante.':'la base existante se contracte ; la croissance dépend de l\'acquisition.'}</li>`;
+  if(len>=3)h+=`<li>Pic de churn de la période : <b>${L[imax]}</b> (${pct(cr[imax])} des clients perdus en un mois).</li>`;
+  if(worst&&worst[1]>0)h+=`<li>Le segment <b>${worst[0]}</b> concentre le plus de MRR perdu sur la période (${fmt(worst[1])} €).</li>`;
+  document.getElementById('ins').innerHTML=h;
+
+  /* graphiques */
+  setC('c1',L,Object.values(D.seg).map(sl));
+  setC('c2',L,[sl(K.new_customers),sl(K.churned_customers).map(x=>-x)]);
+  setC('c3',L,[cr.map(x=>x*100)]);
+  setC('c4',L,[sl(K.arpa)]);
+  setC('c5',L,Object.values(D.plan).map(sl));
+  const nl=D.nrr_months.filter(m=>m>=M[i0]&&m<=M[i1]),n0=D.nrr_months.indexOf(nl[0]);
+  setC('c6',nl,[D.nrr.slice(n0,n0+nl.length),D.logo.slice(n0,n0+nl.length)]);
+  document.querySelectorAll('.end').forEach(p=>p.textContent='Valeur à fin '+M[e]);
+  const t7=topAt(D.country,e),t8=topAt(D.industry,e);
+  setC('c7',t7.map(x=>x[0]),[t7.map(x=>x[1])]);
+  setC('c8',t8.map(x=>x[0]),[t8.map(x=>x[1])]);
+  const lk=Object.keys(lost);setC('c9',lk,[lk.map(k=>lost[k])]);
+  setC('c10',L,[sl(K.revenue),sl(K.mrr)]);
+}
+render();
 </script></body></html>
